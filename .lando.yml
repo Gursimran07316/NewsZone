@@ -1,0 +1,6 @@
+name: newsbackendserver
+recipe: pantheon
+config:
+  framework: drupal8
+  site: newsbackendserver
+  id: fecddd32-01b7-4f69-8e31-0f3d5f18a7aa
