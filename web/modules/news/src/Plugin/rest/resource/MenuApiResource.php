@@ -15,7 +15,8 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
-
+use Drupal\Core\Menu\MenuTreeParameters;
+use Drupal\menu_link_content\MenuLinkContent;
 /**
  * Represents menu api records as resources.
  *
@@ -45,7 +46,7 @@ use Symfony\Component\Routing\Route;
   id: 'news_menu_api',
   label: new TranslatableMarkup('menu api'),
   uri_paths: [
-    'canonical' => '/api/news-menu-api/{id}',
+    'canonical' => '/api/news-menu-api/{menu_name}',
     'create' => '/api/news-menu-api',
   ],
 )]
@@ -99,14 +100,31 @@ final class MenuApiResource extends ResourceBase {
   /**
    * Responds to GET requests.
    */
-  public function get($id): ResourceResponse {
-    if (!$this->storage->has($id)) {
-      throw new NotFoundHttpException();
-    }
-    $resource = $this->storage->get($id);
-    return new ResourceResponse($resource);
+  public function get($menu_name): ResourceResponse {
+    $menu_tree_service=\Drupal::menuTree();
+    $parameters=new MenuTreeParameters();
+    $tree = $menu_tree_service->load($menu_name,$parameters);
+    $menu_items=$this->buildTree($tree);
+    return new ResourceResponse($menu_items);
   }
+  
+  private function buildTree(array $tree){
+    $items=[];
+    foreach($tree as $element) {
+    $menu_link = $element->link;
+    $item=[
+    'title' => $menu_link->getTitle(),
+    'url' => $menu_link->getUrlObject() ->toString(),
+    ];
 
+    if (!empty($element->subtree)) {
+    $item[ 'sub_menu'] = $this->buildTree($element->subtree) ;
+    }
+    $items [] = $item;
+        }
+    return $items;
+  }
+   
   /**
    * Responds to PATCH requests.
    */
