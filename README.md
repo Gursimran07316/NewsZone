@@ -14,7 +14,7 @@ This repository contains both:
 
 - 🧩 **Decoupled Architecture:** React frontend + Drupal backend
 - ⚛️ Frontend: React.js with Vite, Axios, Swiper.js, FontAwesome, Bootstrap
-- 🧩 Backend: Drupal 10, JSON:API module enabled
+- 🧩 Backend: Drupal 11, JSON:API module enabled
 - 📡 API-driven dynamic content delivery
 - 🎯 Modular, scalable, and professional structure
 - 💻 Responsive & clean UI
