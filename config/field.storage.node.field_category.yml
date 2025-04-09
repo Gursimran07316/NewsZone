@@ -1,15 +1,16 @@
-uuid: b6be3605-9e17-450d-bc83-05a4eb1696db
+uuid: 7b7c6deb-baa0-4940-9f17-bdd7c184bfcc
 langcode: en
 status: true
 dependencies:
   module:
     - node
-id: node.field_news
-field_name: field_news
+    - taxonomy
+id: node.field_category
+field_name: field_category
 entity_type: node
 type: entity_reference
 settings:
-  target_type: node
+  target_type: taxonomy_term
 module: core
 locked: false
 cardinality: -1

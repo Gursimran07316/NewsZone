@@ -15,7 +15,8 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
-
+use Drupal\file\Entity\File;
+use Drupal\taxonomy\Entity\Term;
 /**
  * Represents news records as resources.
  *
@@ -111,7 +112,29 @@ final class NewsResource extends ResourceBase {
         $statusCode = 404;
         $statusMessage = "Bad Request";
         throw new \Exception("Name query missing!");
+      }else{
+        $nodeId=$this->getNode($requestNameAlias);
+        if(empty($requestNameAlias)){
+          $statusCode = 404;
+          $statusMessage = "Bad Request";
+          throw new \Exception("Content not found");
       }
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nodeId);
+      $fieldnews=$node->field_news->getValue();
+      foreach($fieldnews as $newsItem){
+        $news=\Drupal::entityTypeManager()->getStorage('node')->load($newsItem['target_id']);
+        $sliderDataOne=$this->getSlider($news);
+        if (sizeof($sliderDataOne) > 0) {
+        $newsData['maincrousal'][]=$sliderDataOne;
+        }
+        $sliderDataTwo=$this->getSliderRight($news);
+        if (sizeof($sliderDataTwo) > 0) {
+        $newsData['sliderRight'][]=$sliderDataTwo;
+      }
+      }
+      
+    
+    }
     }catch(\Exception $e){
   
     }
@@ -125,7 +148,64 @@ final class NewsResource extends ResourceBase {
   
     return new ResourceResponse($response);
   }
-  
+  private function getSlider($node) {
+    $data = [];
+    $sliderImg = $node->field_banner_1->getValue();
+
+    if (sizeof($sliderImg) > 0) {
+        $data["title"] = $node->getTitle();
+        $file = File::load($sliderImg[0]["target_id"]);
+        $uri = $file->getFileUri();
+        $url_generator = \Drupal::service("file_url_generator");
+        $url = $url_generator->generateAbsoluteString($uri);
+        $data["largeImg"] = $url;
+        $fieldNewsCategories = $node->field_category->getValue();
+        if (sizeof($fieldNewsCategories) > 0) {
+            $term = Term::load($fieldNewsCategories[0]["target_id"]);
+            if ($term) {
+                $data["category"] = $term->getName();
+            }
+        }
+    }
+
+    return $data;
+}
+private function getSliderRight($node) {
+  $data = [];
+  $sliderImg = $node->field_banner_2->getValue();
+
+  if (sizeof($sliderImg) > 0) {
+      $data["title"] = $node->getTitle();
+      $file = File::load($sliderImg[0]["target_id"]);
+      $uri = $file->getFileUri();
+      $url_generator = \Drupal::service("file_url_generator");
+      $url = $url_generator->generateAbsoluteString($uri);
+      $data["imgUrl"] = $url;
+      $fieldNewsCategories = $node->field_category->getValue();
+      if (sizeof($fieldNewsCategories) > 0) {
+          $term = Term::load($fieldNewsCategories[0]["target_id"]);
+          if ($term) {
+              $data["category"] = $term->getName();
+          }
+      }
+  }
+
+  return $data;
+}
+
+
+  private function getNode($path)
+{
+    $result = \Drupal::database()
+        ->select("path_alias", "p")
+        ->fields("p")
+        ->condition("alias", "/" . $path) // /home
+        ->execute()
+        ->fetchObject();
+
+    return $result && $result->path ? str_replace("/node/", "", $result->path) : "";
+}
+
 
   /**
    * Responds to PATCH requests.
