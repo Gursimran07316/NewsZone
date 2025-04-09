@@ -6,7 +6,7 @@ This repository contains both:
 - 🖥️ **Frontend**: React.js application (in the `/frontend` folder)
 - 🗂️ **Backend**: Drupal application (in the root directory)
 
-> 🔗 **Live Repository:** [NewsZone](https://github.com/Gursimran07316/NewsZone)
+> 🔗 **Repository:** [NewsZone](https://github.com/Gursimran07316/NewsZone)
 
 ---
 
